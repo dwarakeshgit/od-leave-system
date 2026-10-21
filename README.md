@@ -104,9 +104,9 @@ PERIODS_PER_DAY=8
 npm run seed
 ```
 
-This creates a CSE department, one class of 12 students, two weeks of attendance, and five requests sitting at different approval stages. It prints the demo logins when it finishes.
+This ensures a CSE department, one class section with 20 demo students, two weeks of realistic period-wise attendance (ranging from 65% to 98%), and sample requests at different approval stages. It prints the demo logins and attendance report when it finishes.
 
-> The seed script **clears** the collections it writes to. Never run it against real data.
+> The seed script is idempotent: running it repeatedly safely updates/inserts records without deleting accounts.
 
 ### 5. Start the backend
 
@@ -143,7 +143,7 @@ The login screen has buttons that fill these in for you.
 | HOD | `hod@college.edu` | `hod123` |
 | Office | `admin@college.edu` | `admin123` |
 
-Students `21cs001` through `21cs012` all exist with the password `student123`.
+Students `21cs001` through `21cs020` all exist with the password `student123`.
 
 ---
 
