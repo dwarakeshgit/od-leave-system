@@ -1,0 +1,741 @@
+/* ---------------------------------------------------------------
+   OD & Leave Desk — visual system
+   The interface borrows from a paper attendance register: hairline
+   rules instead of card shadows, ink navy for text, and coloured
+   ink stamps for the three states a request can be in.
+----------------------------------------------------------------*/
+
+:root {
+  --ink: #16233b;
+  --ink-soft: #5a6884;
+  --ink-faint: #8e99ad;
+  --paper: #edf0f4;
+  --sheet: #ffffff;
+  --rule: #d6dce6;
+  --rule-strong: #b9c2d1;
+
+  --stamp-approved: #1f5d50;
+  --stamp-approved-bg: #e3f0eb;
+  --stamp-pending: #8a5c0d;
+  --stamp-pending-bg: #f7eeda;
+  --stamp-rejected: #9b3527;
+  --stamp-rejected-bg: #f8e7e3;
+  --stamp-quiet: #5a6884;
+  --stamp-quiet-bg: #e7ebf1;
+
+  --focus: #274690;
+
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --gutter: 28px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+h1 {
+  font-size: 30px;
+  line-height: 1.2;
+}
+h2 {
+  font-size: 22px;
+}
+h3 {
+  font-size: 17px;
+}
+
+p {
+  margin: 0 0 12px;
+  max-width: 68ch;
+}
+
+a {
+  color: var(--focus);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------------- layout ---------------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 244px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--ink);
+  color: #dfe5ef;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.brand {
+  font-family: var(--serif);
+  font-size: 21px;
+  color: #fff;
+  line-height: 1.15;
+}
+
+.brand span {
+  display: block;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: #93a1bb;
+  margin-top: 4px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav a {
+  color: #c3ccdd;
+  text-decoration: none;
+  padding: 9px 12px;
+  border-radius: 4px;
+  font-size: 14.5px;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.nav a.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  box-shadow: inset 2px 0 0 #e8b84b;
+}
+
+.nav .badge {
+  float: right;
+  background: #e8b84b;
+  color: #3a2c07;
+  border-radius: 10px;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  font-size: 13px;
+  color: #93a1bb;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: 14px;
+}
+
+.sidebar-foot strong {
+  display: block;
+  color: #fff;
+  font-weight: 500;
+}
+
+.linkish {
+  background: none;
+  border: 0;
+  color: #e8b84b;
+  padding: 6px 0 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.main {
+  padding: 30px var(--gutter) 60px;
+  max-width: 1080px;
+  width: 100%;
+}
+
+.page-head {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-head p {
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ---------------- sheets & tables ---------------- */
+
+.sheet {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.sheet > h3 {
+  margin-bottom: 14px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 8px 10px;
+  border-bottom: 1.5px solid var(--rule-strong);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.num {
+  font-family: var(--serif);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- the attendance ruler ---------------- */
+
+.ruler {
+  margin: 6px 0 4px;
+}
+
+.ruler-figure {
+  font-family: var(--serif);
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.ruler-figure sup {
+  font-size: 22px;
+  top: -0.7em;
+}
+
+.ruler-caption {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.ruler-track {
+  position: relative;
+  height: 18px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rule) 0 1px,
+    transparent 1px 10%
+  );
+  border-bottom: 2px solid var(--ink);
+}
+
+.ruler-fill {
+  height: 100%;
+  background: var(--stamp-approved);
+}
+
+.ruler-fill.short {
+  background: var(--stamp-rejected);
+}
+
+.ruler-mark {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  background: var(--ink);
+}
+
+.ruler-mark::after {
+  content: attr(data-label);
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.ruler-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.ruler-legend b {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--ink);
+  margin-right: 5px;
+}
+
+/* ---------------- stamps & counters ---------------- */
+
+.stamp {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.stamp.approved {
+  color: var(--stamp-approved);
+  background: var(--stamp-approved-bg);
+}
+.stamp.pending {
+  color: var(--stamp-pending);
+  background: var(--stamp-pending-bg);
+}
+.stamp.rejected {
+  color: var(--stamp-rejected);
+  background: var(--stamp-rejected-bg);
+}
+.stamp.cancelled,
+.stamp.quiet {
+  color: var(--stamp-quiet);
+  background: var(--stamp-quiet-bg);
+}
+
+.counter {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  padding: 14px 16px;
+  border-radius: 3px;
+}
+
+.counter .value {
+  font-family: var(--serif);
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.counter .label {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+/* ---------------- forms ---------------- */
+
+label {
+  display: block;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 9px 11px;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.hint {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-top: 5px;
+}
+
+button,
+.button {
+  font: inherit;
+  font-weight: 500;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button:hover {
+  background: #22304c;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+button.ghost:hover {
+  background: #e7ebf1;
+}
+
+button.approve {
+  background: var(--stamp-approved);
+  border-color: var(--stamp-approved);
+}
+button.approve:hover {
+  background: #17493f;
+}
+
+button.reject {
+  background: transparent;
+  color: var(--stamp-rejected);
+  border-color: var(--stamp-rejected);
+}
+button.reject:hover {
+  background: var(--stamp-rejected-bg);
+}
+
+button.small {
+  padding: 5px 12px;
+  font-size: 13.5px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.period-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.period-picker label {
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 7px 12px;
+  color: var(--ink);
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+}
+
+.period-picker label.on {
+  border-color: var(--ink);
+  background: #e7ebf1;
+  font-weight: 500;
+}
+
+/* ---------------- messages ---------------- */
+
+.note {
+  border-left: 3px solid var(--ink);
+  background: #fff;
+  padding: 11px 14px;
+  border-radius: 0 3px 3px 0;
+  margin-bottom: 16px;
+}
+
+.note.error {
+  border-color: var(--stamp-rejected);
+  color: var(--stamp-rejected);
+}
+
+.note.good {
+  border-color: var(--stamp-approved);
+  color: var(--stamp-approved);
+}
+
+.empty {
+  text-align: left;
+  padding: 26px 0;
+  color: var(--ink-soft);
+}
+
+.empty h3 {
+  color: var(--ink);
+}
+
+/* ---------------- request entries ---------------- */
+
+.entry {
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 0;
+}
+
+.entry:last-child {
+  border-bottom: 0;
+}
+
+.entry-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.entry-title {
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+.entry-meta {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+
+.trail {
+  margin-top: 12px;
+  border-left: 2px solid var(--rule);
+  padding-left: 14px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.trail div + div {
+  margin-top: 6px;
+}
+
+/* ---------------- login ---------------- */
+
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+
+.login-side {
+  background: var(--ink);
+  color: #e6ebf3;
+  padding: 52px 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-side h1 {
+  color: #fff;
+  font-size: 40px;
+  max-width: 13ch;
+}
+
+.login-side p {
+  color: #adb9cf;
+  max-width: 40ch;
+}
+
+.login-ledger {
+  margin-top: 34px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.login-ledger div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 14px;
+  color: #c3ccdd;
+}
+
+.login-ledger div span:last-child {
+  color: #e8b84b;
+  font-family: var(--serif);
+}
+
+.login-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.demo-keys {
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+}
+
+.demo-keys button {
+  background: none;
+  border: 0;
+  color: var(--focus);
+  padding: 2px 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* ---------------- responsive ---------------- */
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    order: 3;
+  }
+
+  .nav a {
+    padding: 7px 10px;
+    font-size: 13.5px;
+  }
+
+  .sidebar-foot {
+    margin-left: auto;
+    margin-top: 0;
+    border: 0;
+    padding: 0;
+    text-align: right;
+  }
+
+  .main {
+    padding: 22px 16px 50px;
+  }
+
+  .grid-3,
+  .grid-4,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .login-side {
+    padding: 34px 22px;
+  }
+
+  .login-side h1 {
+    font-size: 30px;
+  }
+
+  .ruler-figure {
+    font-size: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
